@@ -3,7 +3,7 @@ const keccak256 = require('keccak256');
 
 // Sample leaves data - 修正地址格式，确保每个地址都是有效的
 const leaves = [
-    "0x53B38Da6a701c568545dCfcB03f87B87556BeddC5",
+    "0xba03CD7d4b6ACdaC86e3591f4C8EFD8fFB93a340",
     "0xA4B4F364C96d1Ce98b49Ae9C7dD39131855Cb3B2",
     "0x4B20993BC481177ec7E8f51c7ecA2b8A92E020edb",
     "0x78713DcA6b7B34ac0F824c42a7C18A495cabaB"

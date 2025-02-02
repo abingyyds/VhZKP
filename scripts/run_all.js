@@ -24,7 +24,7 @@ async function runCommand(command, workDir) {
 async function main() {
     try {
         // 获取命令行参数
-        const nullifierValue = process.argv[2] || "110";  // 默认值为123
+        const nullifierValue = process.argv[2] || "110000";  // 设置随机数！！！！！！！！！！！！！！！！
         console.log("\n使用的nullifier值:", nullifierValue);
 
         // 第一步：运行calculate_hash

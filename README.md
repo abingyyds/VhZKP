@@ -41,6 +41,14 @@
 - `package.json`：项目依赖和脚本配置文件
   > Project dependencies and script configuration file
 
+
+sudo node --expose-gc cold_start_benchmark.js
+sudo node --expose-gc warm_start_benchmark.js
+sudo node --expose-gc real_load_benchmark.js
+
+
+
+
 ## 部署信息 | Deployment Information
 - 网络 | Network: Sepolia测试网 (Sepolia Testnet)
 - 合约地址 | Contract Address: 0xd99c3961c3601E4a8D3a74879d5C4691E5469224 

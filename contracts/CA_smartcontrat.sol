@@ -6,11 +6,12 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 // 验证器接口
 interface IVerifier {
+    // 修改参数为 calldata 类型
     function verifyProof(
-        uint[2] memory a,
-        uint[2][2] memory b,
-        uint[2] memory c,
-        uint[1] memory input
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        uint[1] calldata input
     ) external view returns (bool);
 }
 
@@ -76,32 +77,28 @@ contract MerkleTreeWhitelist {
     }
 
     // 新增：验证并使用hasher的函数
-    function verifyAndUseHasher(
-        uint[2] memory a,
-        uint[2][2] memory b,
-        uint[2] memory c,
-        uint[1] memory input
+        function verifyAndUseHasher(
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        uint[1] calldata input
     ) external {
-        // 1. 验证零知识证明
-        bool isValid = verifier.verifyProof(a, b, c, input);
+        // 验证零知识证明
+        bool isValid = verifier.verifyProof(a, b, c, input); // 现在使用 calldata 传递参数
         if (!isValid) {
             revert ZKPVerificationFailed();
         }
 
-        // 2. 将input转换为bytes32以便查找
         bytes32 hasher = bytes32(input[0]);
 
-        // 3. 检查hasher是否存在
         if (!hasherMapping[hasher]) {
             revert HasherNotFound();
         }
 
-        // 4. 检查hasher是否可用（状态为true）
-        if (hasherMapping[hasher] == false) {  // 如果状态已经是false，说明是重放攻击
+        if (!hasherMapping[hasher]) { // 更严谨的条件检查
             revert ReplayAttack();
         }
 
-        // 5. 更新hasher状态为已使用（false）
         hasherMapping[hasher] = false;
         emit HasherStatusChanged(hasher, false);
     }

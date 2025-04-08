@@ -35,6 +35,8 @@ contract MerkleTreeWhitelist {
     // 当新的 hasher(nullifier) 被上传时触发的事件
     event HasherMappingUpdated(bytes32 indexed hasher, bool status);
     event HasherStatusChanged(bytes32 indexed hasher, bool newStatus);
+    // 新增：验证结果事件
+    event VerificationResult(bytes32 indexed hasher, bool isValid, bool hasherExists);
 
     // 错误定义
     error ZKPVerificationFailed();
@@ -76,31 +78,34 @@ contract MerkleTreeWhitelist {
         emit HasherMappingUpdated(_hasher, true);
     }
 
-    // 新增：验证并使用hasher的函数
-        function verifyAndUseHasher(
+    // 修改后的验证并使用hasher的函数，先验证后上链
+    function verifyAndUseHasher(
         uint[2] calldata a,
         uint[2][2] calldata b,
         uint[2] calldata c,
         uint[1] calldata input
-    ) external {
-        // 验证零知识证明
-        bool isValid = verifier.verifyProof(a, b, c, input); // 现在使用 calldata 传递参数
-        if (!isValid) {
-            revert ZKPVerificationFailed();
-        }
-
+    ) external returns (bool) {
         bytes32 hasher = bytes32(input[0]);
-
-        if (!hasherMapping[hasher]) {
-            revert HasherNotFound();
+        
+        // 1. 先验证ZKP
+        bool isValid = verifier.verifyProof(a, b, c, input);
+        
+        // 2. 检查hasher是否存在
+        bool hasherExists = hasherMapping[hasher];
+        
+        // 3. 发出验证结果事件
+        emit VerificationResult(hasher, isValid, hasherExists);
+        
+        // 4. 如果验证失败或hasher不存在，返回false但不回滚交易
+        if (!isValid || !hasherExists) {
+            return false;
         }
-
-        if (!hasherMapping[hasher]) { // 更严谨的条件检查
-            revert ReplayAttack();
-        }
-
+        
+        // 5. 验证成功，执行上链操作
         hasherMapping[hasher] = false;
         emit HasherStatusChanged(hasher, false);
+        
+        return true;
     }
 
     // 查看函数：检查特定的 hasher(nullifier) 是否已被设置
